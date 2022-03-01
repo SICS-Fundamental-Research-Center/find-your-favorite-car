@@ -12,7 +12,6 @@ window.Module = {
       "./datasets/cars.txt",
       "./datasets/labelsOfCars.txt"
     );
-    console.log(points,labels)
     const attributes = [
       ["Price (USD)", { low: 1000, high: 50000, smallerBetter: true }],
       ["Year", { low: 2001, high: 2017, smallerBetter: false }],

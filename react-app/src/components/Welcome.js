@@ -7,7 +7,7 @@ import {
   setDataset
 } from "../actions";
 import { connect } from "react-redux";
-import { selectCandidates, parsePoints, getRanges } from "../utils";
+import { selectCandidates, getRanges } from "../utils";
 
 // the welcome scene containing a brief introduction and a table to obtain the user's input
 class Welcome extends React.Component {
@@ -27,25 +27,18 @@ class Welcome extends React.Component {
         // attributes.1 ... attributes.k
         // 0.4534 ... 0.345(k)
         var points_attr = text.trim().split("\n").slice(1)
-        var points = points_attr.slice(1) // the first line is <numOfPoints> <dimension>
-          .map(line =>
-            line
-              .trim()
-              .split(/\s+/)
-              .map(str => parseFloat(str))
-          );
+        // the first line is <numOfPoints> <dimension>
+        var points = points_attr.slice(1).map(line => line.trim().split(/\s+/).map(str => parseFloat(str)));
         var ranges = getRanges(points)
         var attributes = points_attr[0].trim().split(/\s+/).map((item, index) => {
           let rangesItem = ranges[index]
           rangesItem.smallerBetter = false
           return [item, rangesItem]
         })
-        console.log(points)
         console.log(attributes)
         this.props.setDataset(points, '', attributes)
       };
     }
-    console.log(target)
   }
 
   handleStart = () => {
@@ -93,6 +86,18 @@ class Welcome extends React.Component {
   handleModeChange = event => {
     this.props.changeMode(event.target.value);
   };
+  handleChange = (e) => {
+    let idx = this.state.arr.findIndex(item => {
+      return item === e.target.value
+    })
+    if (idx >= 0) {
+      this.state.arr.splice(idx, 1);
+    } else {
+      this.state.arr.push(e.target.value);
+    }
+    let arr = this.state.arr;
+    this.setState({ arr });
+  }
 
   render() {
     this.inputs = {};
@@ -103,10 +108,8 @@ class Welcome extends React.Component {
     console.log(this.props.attributes)
     const trs = this.props.attributes.map(([attr, config]) => {
       console.log(config)
-
       const disabled = this.props.mask[attr] === 0;
       const { low, high } = config;
-      console.log(config)
       return (
         <tr key={attr}>
           <td className="align-middle">{attr}</td>
@@ -151,11 +154,24 @@ class Welcome extends React.Component {
             ref={this.inputs.maxPoints}
           />
         </td>
-        <td>
-          <div className="col form-inline align-items-center">
-            <label className="mr-4 col-form-label font-weight-bold">Mode</label>
-            <div className="mr-3 form-check form-check-inline">
-              <input
+        <td style={{ 'text-align': 'left' }}>
+          {/* <div className="col form-inline align-items-center"> */}
+          <label className="mr-4 col-form-label font-weight-bold">Mode</label>
+          <div className="mr-3 form-check form-check-inline">
+            <div>
+              <select onChange={this.handleChange}>
+                <option value="DMM">DMM</option>
+                <option value="Cube">Cube</option>
+                <option value="Sphere">Sphere</option>
+                <option value="Simplex">Simplex</option>
+                <option value="Random">Random</option>
+                <option value="GraphDP">GraphDP</option>
+                <option value="biSearch">biSearch</option>
+                <option value="sweepDP">sweepDP</option>
+                <option value="IncGreedy">IncGreedy</option>
+              </select>
+            </div>
+            {/* <input
                 className="form-check-input"
                 type="radio"
                 name="inlineRadioOptions"
@@ -166,9 +182,9 @@ class Welcome extends React.Component {
               />
               <label className="form-check-label" htmlFor="simplex">
                 Simplex
-              </label>
-            </div>
-            <div className="form-check form-check-inline">
+              </label> */}
+          </div>
+          {/* <div className="form-check form-check-inline">
               <input
                 className="form-check-input"
                 type="radio"
@@ -181,8 +197,8 @@ class Welcome extends React.Component {
               <label className="form-check-label" htmlFor="random">
                 Random
               </label>
-            </div>
-          </div>
+            </div> */}
+          {/* </div> */}
         </td>
         <td />
       </tr>
