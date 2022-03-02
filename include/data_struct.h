@@ -158,5 +158,52 @@ struct setNode_s
 	int *level;
 };
 
+typedef struct linked_pt
+{
+	point_t* pt;
+
+	linked_pt* next;
+	linked_pt* prev;
+} linked_pt_t;
+
+typedef struct inter_point
+{
+	point_t* pt;
+	linked_pt_t* linked_pt_i;
+	linked_pt_t* linked_pt_j;
+
+} inter_point_t;
+
+// date structure for computing catersian product
+typedef std::vector<double> Vi;
+typedef std::vector<Vi> Vvi;
+
 typedef struct setNode_s setNode;
+
+
+// data structure for configuration file
+typedef struct stat_s
+{	
+	char*	algName;
+	double 	time;
+	double	mrr;
+	int		r;
+	
+}	stat_t;
+
+// data structure for configuration file
+typedef struct stat_list
+{	
+	int			numberOfalg;
+	stat_t** 	alg_list;
+	
+}	stat_list_t;
+
+typedef struct stat_result
+{	
+	int				numberOfQueries;
+	stat_list_t** 	stats;
+	
+}	stat_result_t;
+
 #endif

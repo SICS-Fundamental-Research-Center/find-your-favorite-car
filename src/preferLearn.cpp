@@ -48,6 +48,53 @@ int get_current_best_pt(point_set_t* P, vector<int>& C_idx, vector<point_t*>& ex
 	return best_pt_idx;
 }
 
+int get_current_best_pt(point_set_t* P, vector<int>& C_idx, vector<point_t*>& ext_vec, point_t* &R_mean)
+{
+	int dim = P->points[0]->dim;
+
+	// the set of extreme points of the candidate utility range R
+	vector<point_t*> ext_pts;
+	ext_pts = get_extreme_pts(ext_vec);
+
+	// use the "mean" utility vector in R (other strategies could also be used)
+	point_t* mean = alloc_point(dim);
+	for(int i = 0; i < dim; i++)
+	{
+		mean->coord[i] = 0;
+	}
+	for(int i = 0; i < ext_pts.size(); i++)
+	{
+		for(int j = 0; j < dim; j++)
+			mean->coord[j] += ext_pts[i]->coord[j];
+	}
+	for(int i = 0; i < dim; i++)
+	{
+		mean->coord[i] /= ext_pts.size();
+	}
+
+	// look for the maximum utility point w.r.t. the "mean" utility vector
+	int best_pt_idx;
+	double max = 0;
+	for(int i = 0; i < C_idx.size(); i++)
+	{
+		point_t* pt = P->points[C_idx[i]];
+
+		double v = dot_prod(pt, mean);
+		if(v > max)
+		{
+			max = v;
+			best_pt_idx =  C_idx[i];
+		}
+	}
+
+	R_mean = mean;
+
+	for(int i = 0; i < ext_pts.size(); i++)
+		release_point(ext_pts[i]);
+	return best_pt_idx;
+}
+
+
 // generate s cars for selection in a round
 // P: the input car set
 // C_idx: the indexes of the current candidate favorite car in P
@@ -56,7 +103,7 @@ int get_current_best_pt(point_set_t* P, vector<int>& C_idx, vector<point_t*>& ex
 // last_best: the best car in previous interaction
 // frame: the frame for obtaining the set of neibouring vertices of the current best vertiex (used only if cmp_option = SIMPLEX)
 // cmp_option: the car selection mode, which must be either SIMPLEX or RANDOM
-vector<int> generate_S(point_set_t* P, vector<int>& C_idx, int s, int current_best_idx, int& last_best, vector<int>& frame, int cmp_option)
+vector<int> generate_S(point_set_t* P, vector<int>& C_idx, int s, int current_best_idx, int& last_best, vector<int>& frame, vector<point_t*>& ext_vec, int cmp_option)
 {
 	// the set of s cars for selection
 	vector<int> S;
@@ -165,6 +212,33 @@ vector<int> generate_S(point_set_t* P, vector<int>& C_idx, int s, int current_be
 			}
 		}
 	}
+	else if(cmp_option == PARTI && s == 2) // PARTI car selection mode
+	{
+		point_t* R_mean = NULL;
+		get_current_best_pt(P, C_idx, ext_vec, R_mean);
+		double min_dist = INF;
+		S.resize(2);
+
+		//print_point(R_mean);
+		for(int i = 0; i < C_idx.size(); i++)
+		{
+			for(int j = i + 1; j < C_idx.size(); j++)
+			{
+				point_t* p = P->points[C_idx[i]];
+				point_t* q = P->points[C_idx[j]];
+
+				point_t* p_minus_q = sub(p , q);
+				double dist = abs(dot_prod(p_minus_q, R_mean) / calc_len(p_minus_q));
+				release_point(p_minus_q);
+
+				if(min_dist > dist)
+				{
+					S[0] = i;
+					S[1] = j;
+				}
+			}
+		}
+	}
 	else // for testing only. Do not use this!
 	{
 		vector<point_t*> rays;
@@ -204,6 +278,7 @@ vector<int> generate_S(point_set_t* P, vector<int>& C_idx, int s, int current_be
 	return S;
 }
 
+
 // get the better car among two (whose indexes p_idx and q_idx in P) from the user
 int show_to_user(point_set_t* P, int p_idx, int q_idx)
 {
@@ -241,7 +316,7 @@ int show_to_user(point_set_t* P, int p_idx, int q_idx)
 void update_ext_vec(FILE *wPtr, point_set_t* P_car, point_set_t* skyline_proc_P, vector<int>& C_idx, int s, vector<point_t*>& ext_vec, int& current_best_idx, int& last_best, vector<int>& frame, int cmp_option)
 {
 	// generate s cars for selection in a round
-	vector<int> S = generate_S(skyline_proc_P, C_idx, s, current_best_idx, last_best, frame, cmp_option);
+	vector<int> S = generate_S(skyline_proc_P, C_idx, s, current_best_idx, last_best, frame, ext_vec, cmp_option);
 	
 	if (S.size() != 2) // we fix s to be 2 in the demo
 	{
@@ -528,9 +603,9 @@ void demo()
 
 	// select the car selection mode
 	int option = 0;
-	while (option != 1 && option != 2)
+	while (option != 1 && option != 2 && option != 3)
 	{
-		printf("Please choose the display method: Simplex(1) or Random(2): ");
+		printf("Please choose the display method: Simplex(1) or Random(2) or Partition (3): ");
 		scanf("%d", &option);
 	}
 
@@ -539,6 +614,11 @@ void demo()
 	{
 		fprintf(wPtr, "SIMPLEX\n");
 		p = max_utility(wPtr, P, SIMPLEX);
+	}
+	else if (option == 3) // PARTI selection mode
+	{
+		fprintf(wPtr, "\nParti\n");
+		p = max_utility(wPtr, P, PARTI);	
 	}
 	else // RANDOM selection mode
 	{

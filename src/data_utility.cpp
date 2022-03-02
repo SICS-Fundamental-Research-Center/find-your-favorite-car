@@ -138,6 +138,51 @@ void release_point_set(point_set_t* &point_set_v, bool clear)
 	point_set_v = NULL;
 }
 
+
+inter_point_t* alloc_inter_point(point_t* pt, linked_pt* i, linked_pt* j)
+{
+	inter_point_t* inter_point_v;
+
+	inter_point_v = ( inter_point_t*)malloc( sizeof( inter_point_t));
+	memset( inter_point_v, 0, sizeof( inter_point_t));
+
+	inter_point_v->linked_pt_i = i;
+	inter_point_v->linked_pt_j = j;
+	inter_point_v->pt = pt;
+
+	return inter_point_v;
+}
+
+void release_inter_point(inter_point_t* &inter_point_v)
+{
+	if(inter_point_v == NULL)
+		return;
+
+	free(inter_point_v);
+	inter_point_v = NULL;
+}
+
+linked_pt_t* alloc_linked_pt(point_t* pt)
+{
+	linked_pt_t* linked_pt_v;
+
+	linked_pt_v = ( linked_pt_t*)malloc( sizeof( linked_pt_t));
+	memset( linked_pt_v, 0, sizeof( linked_pt_t));
+
+	linked_pt_v->pt = pt;
+
+	return linked_pt_v;
+}
+
+void release_linked_pt(linked_pt_t* &linked_pt_v)
+{
+	if(linked_pt_v == NULL)
+		return;
+
+	free(linked_pt_v);
+	linked_pt_v = NULL;
+}
+
 /*
 *	For degug purpose, print the coordinates for a given point
 */
@@ -160,4 +205,92 @@ void print_point_set(point_set_t* point_set_v)
 		print_point(point_set_v->points[i]);
 
 	printf("\n");
+}
+
+
+stat_t* alloc_stat(char* algName, double time, double mrr, int r)
+{
+	stat_t* stat_v;
+
+	stat_v = ( stat_t*)malloc( sizeof( stat_t));
+	memset( stat_v, 0, sizeof( stat_t));
+
+	//stat_v->algName = (char*)malloc( sizeof(char) * MAX_FILENAME_LENG);
+	//memset( stat_v->algName, 0, sizeof(char) * MAX_FILENAME_LENG);
+
+	stat_v->algName = algName;
+	stat_v->mrr = mrr;
+	stat_v->time = time;
+	stat_v->r = r;
+
+	return stat_v;
+}
+
+void release_stat(stat_t* &stat_v)
+{
+	//free(stat_v->algName);
+
+	free(stat_v);
+	stat_v = NULL;
+}
+
+stat_list_t* alloc_stat_list(int numberOfAlg)
+{
+	stat_list_t* stat_list_v;
+
+	stat_list_v = ( stat_list_t*)malloc( sizeof( stat_list_t));
+	memset( stat_list_v, 0, sizeof( stat_list_t));
+
+	stat_list_v->numberOfalg = numberOfAlg;
+
+	stat_list_v->alg_list = (stat_t **) malloc(numberOfAlg * sizeof(stat_t*));
+	memset(stat_list_v->alg_list, 0, numberOfAlg * sizeof(stat_t*));
+
+	return stat_list_v;
+}
+
+void release_stat_list(stat_list_t* &stat_list_v)
+{
+	if(stat_list_v->alg_list != NULL)
+	{
+		for(int i = 0; i < stat_list_v->numberOfalg; i++)
+			release_stat( stat_list_v->alg_list[i]);
+
+		free(stat_list_v->alg_list);
+		stat_list_v->alg_list = NULL;
+	}
+
+	free(stat_list_v);
+	stat_list_v = NULL;
+}
+
+stat_result_t* alloc_stat_result(int numberOfK)
+{
+	stat_result_t* stat_result_v;
+
+	stat_result_v = ( stat_result_t*)malloc( sizeof( stat_result_t));
+	memset( stat_result_v, 0, sizeof( stat_result_t));
+
+	stat_result_v->numberOfQueries = numberOfK;
+
+	stat_result_v->stats = (stat_list_t **) malloc(numberOfK * sizeof(stat_list_t*));
+	memset(stat_result_v->stats, 0, numberOfK * sizeof(stat_list_t*));
+
+	return stat_result_v;
+}
+
+void release_stat_result(stat_result_t* &stat_result)
+{
+	if(stat_result->stats != NULL)
+	{
+		for(int i = 0; i < stat_result->numberOfQueries; i++)
+			release_stat_list( stat_result->stats[i]);
+
+		free(stat_result->stats);
+		stat_result->stats = NULL;
+	}
+	
+	free(stat_result);
+	stat_result = NULL;
+
 }

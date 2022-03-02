@@ -18,4 +18,10 @@ point_t* find_feasible(std::vector<hyperplane_t*> hyperplane);
 // solve the LP in frame computation
 void solveLP(std::vector<point_t*> B, point_t* b, double& theta, point_t* & pi);
 
+double worstDirection(point_set_t *s, point_t* pt, double* &v);
+double worstDirection(int index, point_set_t *s, point_t* pt, double* &v);
+double worstDirection(int index, point_set_t *s, point_t* pt, float* &v);
+double worstDirection(int index, point_set_t *s, point_set_t *point_set, bool* active, point_t* pt, double* &v);
+double determinant(int n, double** a);
+
 #endif

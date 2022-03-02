@@ -11,6 +11,7 @@
 // differnt tuple selection mode
 #define RANDOM 1
 #define SIMPLEX 2
+#define PARTI 3
 
 // the main method for the demo system
 void demo();

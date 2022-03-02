@@ -4,7 +4,7 @@
 #include "preferLearn.h"
 
 int get_current_best_pt(point_set_t* P, vector<int>& C_idx, vector<point_t*>& ext_vec);
-vector<int> generate_S(point_set_t* P, vector<int>& C_idx, int s, int current_best_idx, int& last_best, vector<int>& frame, int cmp_option);
+vector<int> generate_S(point_set_t* P, vector<int>& C_idx, int s, int current_best_idx, int& last_best, vector<int>& frame, vector<point_t*>& ext_vec, int cmp_option);
 
 point_set_t *normalize_points(vector<vector<double>> &points, vector<int> smallerBetter){
 
@@ -71,7 +71,7 @@ public:
 
     vector<int> nextPair(){
         sort(C_idx.begin(), C_idx.end());
-        S = generate_S(skyline, C_idx, s, current_best_idx, last_best, frame, cmp_option);
+        S = generate_S(skyline, C_idx, s, current_best_idx, last_best, frame, ext_vec, cmp_option);
         if(S.size() != 2){
             printf("invalid option numbers");
             exit(0);
