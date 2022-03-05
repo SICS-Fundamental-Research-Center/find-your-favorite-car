@@ -2,6 +2,14 @@
 #include <fstream>
 #include <vector>
 #include "preferLearn.h"
+#include "sphere.h"
+#include "adaptive.h"
+#include "cube.h"
+#include "GeoGreedy.h"
+#include "DMM.h"
+#include "graphDP.h"
+#include "sweepDP.h"
+#include "biSearch.h"
 
 int get_current_best_pt(point_set_t* P, vector<int>& C_idx, vector<point_t*>& ext_vec);
 vector<int> generate_S(point_set_t* P, vector<int>& C_idx, int s, int current_best_idx, int& last_best, vector<int>& frame, vector<point_t*>& ext_vec, int cmp_option);
@@ -36,7 +44,7 @@ point_set_t *normalize_points(vector<vector<double>> &points, vector<int> smalle
 
 class AlgorithmRunner {
 public:
-    AlgorithmRunner(vector<vector<double>> &candidates, vector<int> &smallerBetter, int cmp_option) {
+    AlgorithmRunner(char algorithmName, vector<vector<double>> &candidates, vector<int> &smallerBetter, int cmp_option) {
 
         this->cmp_option = cmp_option;
         s = 2;
@@ -58,8 +66,50 @@ public:
             }
             ext_vec.push_back(e);
         }
+
+        switch (algorithmName) {
+            // DMM
+            // Cube
+            // Sphere
+            // Simplex
+            // Random
+            // GraphDP
+            // biSearch
+            // sweepDP
+            // IncGreedy
+            case 'DMM' :
+                current_best_points = DMM(skyline, 15);
+            break;
+            
+            case 'Cube' :
+                current_best_points = cube(15,skyline);
+            break;
+            
+            case 'Sphere' :
+                current_best_points = sphere(skyline, 15);
+            break;
+            
+            case 'GraphDP' :
+                current_best_points = graphDP(skyline, 15);
+            break;
+            
+            case 'biSearch' :
+                current_best_points = biSearch(skyline, 15);
+            break;
+            
+            case 'sweepDP' :
+                current_best_points = sweepDP(skyline, 15);
+            break;
+            
+            case 'IncGreedy' :
+                current_best_points = IncGreedy(15, skyline, alloc_point_set(0));
+            break;
+            
+            default :
+                current_best_idx = get_current_best_pt(skyline, C_idx, ext_vec);
+        }
         
-        current_best_idx = get_current_best_pt(skyline, C_idx, ext_vec);
+        
     }
 
     ~AlgorithmRunner() {
@@ -131,6 +181,7 @@ private:
     int prune_option;
     point_set_t *points_norm;
     point_set_t *skyline;
+    point_set_t *current_best_points;
     vector<int> C_idx;
     vector<point_t *> ext_vec;
     int current_best_idx;
