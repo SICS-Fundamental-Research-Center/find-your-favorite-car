@@ -5,7 +5,7 @@ import PreferenceSpace from "./PreferenceSpace";
 function Visuals() {
   return (
     <div>
-      <h2 style={{'background':'gainsboro','border-radius':'5px','padding':'5px'}}>Visuals</h2>
+      <h2 style={{'background':'gainsboro','borderRadius':'5px','padding':'5px'}}>Visuals</h2>
       <div className="row justify-content-center">
         <div className="col-6" style={{ minWidth: "500px" }}>
           <Histogram />

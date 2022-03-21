@@ -99,6 +99,15 @@ export const vector2Array = vector => {
   return array;
 };
 
+// convert a JS array to a C++ vector
+export const array2Vector = array => {
+  const vec = new window.Module.VectorDouble();
+  array.forEach(x => vec.push_back(x));
+  return vec;
+};
+
+
+
 // get the indices of points pruned.
 // both prevIndices and currIndices need to be sorted.
 export const getPrunedIndices = (prevIndices, currIndices) => {

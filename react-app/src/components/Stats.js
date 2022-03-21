@@ -35,7 +35,7 @@ class Stats extends React.Component {
     ));
     return (
       <div>
-        <h2 style={{'background':'gainsboro','border-radius':'5px','padding':'5px'}}>Statistics</h2>
+        <h2 style={{'background':'gainsboro','borderRadius':'5px','padding':'5px'}}>Statistics</h2>
         <div className="row">
           <div className="col">
             <h4>The No. of Cars Pruned: {this.props.prunedPoints.length}</h4>

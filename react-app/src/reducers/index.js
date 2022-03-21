@@ -7,6 +7,7 @@ import {
   SET_LEFT_POINTS,
   PRUNE_POINTS,
   SET_MODE,
+  SET_K,
   RESTART,
   UPDATE_CONVEX_HULL
 } from "../actions";
@@ -119,7 +120,7 @@ const numLeftPoints = (state = [], action) => {
 };
 
 // the algorithm to select a pair of points.
-const mode = (state = "simplex", action) => {
+const mode = (state = "DMM", action) => {
   switch (action.type) {
     case SET_MODE:
       return action.mode;
@@ -127,6 +128,16 @@ const mode = (state = "simplex", action) => {
       return state;
   }
 };
+// the algorithm output K
+const K = (state = 15, action) => {
+  switch (action.type) {
+    case SET_K:
+      return action.K;
+    default:
+      return state;
+  }
+};
+
 
 // vertices of the convex hull of the preference space.
 const vertices = (state = [], action) => {
@@ -149,5 +160,6 @@ export default combineReducers({
   leftPoints,
   numLeftPoints,
   mode,
+  K,
   vertices
 });

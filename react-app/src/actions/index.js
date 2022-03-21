@@ -5,6 +5,7 @@ export const TOGGLE_MASK = "TOGGLE_MASK";
 export const PRUNE_POINTS = "PRUNE_POINTS";
 export const SET_LEFT_POINTS = "SET_LEFT_POINTS";
 export const SET_MODE = "SET_MODE";
+export const SET_K = "SET_K";
 export const RESTART = "RESTART";
 export const UPDATE_CONVEX_HULL = "UPDATE_CONVEX_HULL";
 
@@ -44,6 +45,11 @@ export const setLeftPoints = indices => ({
 export const changeMode = mode => ({
   type: SET_MODE,
   mode
+});
+
+export const changeK = K => ({
+  type: SET_K,
+  K
 });
 
 export const restart = () => ({

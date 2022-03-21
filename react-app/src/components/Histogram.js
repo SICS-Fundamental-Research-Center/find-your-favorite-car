@@ -69,7 +69,7 @@ class Histogram extends React.Component {
               }}
             />
             <VerticalBarSeries
-              color="rgb(0, 123, 255)"
+              color="#ff8737"
               onNearestX={this._onNearestX}
               data={this.props.data}
               animation

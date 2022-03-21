@@ -4,10 +4,13 @@ import {
   setCandidates,
   toggleMask,
   changeMode,
+  changeK,
   setDataset
 } from "../actions";
 import { connect } from "react-redux";
 import { selectCandidates, getRanges } from "../utils";
+import imgURL from '../assets/imgs/logo-black.png';
+import imgFavorite from '../assets/imgs/favorite.png';
 
 // the welcome scene containing a brief introduction and a table to obtain the user's input
 class Welcome extends React.Component {
@@ -27,9 +30,10 @@ class Welcome extends React.Component {
         // attributes.1 ... attributes.k
         // 0.4534 ... 0.345(k)
         var points_attr = text.trim().split("\n").slice(1)
-        // the first line is <numOfPoints> <dimension>
-        var points = points_attr.slice(1).map(line => line.trim().split(/\s+/).map(str => parseFloat(str)));
+        // for points_attr, the first line is <numOfPoints> <dimension>
+        var points = points_attr.slice(1).map(line => line.trim().split(/\s+/).map(str => isNaN(parseFloat(str)) ? 0 : parseFloat(str)));
         var ranges = getRanges(points)
+        console.log(ranges)
         var attributes = points_attr[0].trim().split(/\s+/).map((item, index) => {
           let rangesItem = ranges[index]
           rangesItem.smallerBetter = false
@@ -42,6 +46,12 @@ class Welcome extends React.Component {
   }
 
   handleStart = () => {
+    if (!['Random', 'Simplex', 'Parti'].includes(this.props.mode)) {
+      var K = parseInt(prompt('Please input a integer K >= ' + this.props.attributes.length))
+      if (!(/(^[1-9]\d*$)/.test(K) && K >= this.props.attributes.length)) return alert('Illegal number!')
+      this.props.changeK(K)
+    }
+
     const ranges = [];
     const mask = [];
     for (let i = 0; i < this.props.attributes.length; ++i) {
@@ -64,10 +74,10 @@ class Welcome extends React.Component {
     }
     let maxPoints;
     const str = this.inputs.maxPoints.current.value.trim();
-    if (str === "") maxPoints = 1000;
+    if (str === "") maxPoints = this.props.points.length;
     else if (/\d+/.test(str)) maxPoints = parseInt(str);
     else {
-      alert(`${str} for Max No. of Cars is not an integer`);
+      alert(`${str} for Maximum items is not an integer`);
       return;
     }
     const candidates = selectCandidates(
@@ -83,36 +93,40 @@ class Welcome extends React.Component {
     this.props.startAlgorithm(candidates);
   };
 
-  handleModeChange = event => {
+  handleChange = event => {
+    if (['graphDP', 'biSearch', 'sweepDP'].includes(event.target.value)) {
+      console.log(this.props.mask)
+      if (Object.values(this.props.mask).filter((i) => i === 1).length > 2) {
+        alert(event.target.value + ' only supports 2D data!')
+        event.target.value = this.props.mode
+        return
+      }
+    }
+    console.log(event.target.value)
     this.props.changeMode(event.target.value);
   };
-  handleChange = (e) => {
-    let idx = this.state.arr.findIndex(item => {
-      return item === e.target.value
-    })
-    if (idx >= 0) {
-      this.state.arr.splice(idx, 1);
-    } else {
-      this.state.arr.push(e.target.value);
-    }
-    let arr = this.state.arr;
-    this.setState({ arr });
-  }
 
   render() {
+    // Init inputs
     this.inputs = {};
     this.props.attributes.forEach(([attr, config]) => {
       this.inputs[attr] = [React.createRef(), React.createRef()];
     });
     this.inputs.maxPoints = React.createRef();
-    console.log(this.props.attributes)
-    const trs = this.props.attributes.map(([attr, config]) => {
-      console.log(config)
+    // Iterate attributes
+    const trs = this.props.attributes.map(([attr, config], index) => {
       const disabled = this.props.mask[attr] === 0;
       const { low, high } = config;
       return (
         <tr key={attr}>
-          <td className="align-middle">{attr}</td>
+          <td
+            className="align-middle">
+            <span
+              onClick={() => this.props.toggleMask(attr, 1 - this.props.mask[attr])}
+              className={`${this.props.mask[attr] ? "attribute-select" : null}`}
+              style={{ 'cursor': 'pointer', 'textDecoration': this.props.mask[attr] ? '' : 'line-through' }}
+            >{attr}</span>
+          </td>
           <td>
             <input
               type="text"
@@ -140,71 +154,53 @@ class Welcome extends React.Component {
               }
             />
           </td>
+          <td className="align-middle" onClick={() => { this.props.attributes[index][1].smallerBetter = !this.props.attributes[index][1].smallerBetter; this.setState({ attributes: this.props.attributes }) }}>
+            {this.props.attributes[index][1].smallerBetter ? <span style={{
+              'background': '#ff8737',
+              'padding': '5px',
+              'borderRadius': '5px',
+              'color': 'white'
+            }}>Yes</span> : <span>No</span>}
+          </td>
         </tr>
       );
     });
     trs.push(
       <tr key="other">
-        <td className="align-middle font-weight-bold">Max No. of Cars</td>
+        <td className="align-middle font-weight-bold">Max No. of Pointes</td>
         <td>
           <input
             type="text"
             className="form-control"
-            placeholder="1000"
+            placeholder={this.props.points.length}
             ref={this.inputs.maxPoints}
           />
         </td>
-        <td style={{ 'text-align': 'left' }}>
+        <td style={{ 'textAlign': 'left' }}>
           {/* <div className="col form-inline align-items-center"> */}
           <label className="mr-4 col-form-label font-weight-bold">Mode</label>
           <div className="mr-3 form-check form-check-inline">
             <div>
               <select onChange={this.handleChange}>
                 <option value="DMM">DMM</option>
-                <option value="Cube">Cube</option>
-                <option value="Sphere">Sphere</option>
+                <option value="cube">cube</option>
+                <option value="sphere">sphere</option>
                 <option value="Simplex">Simplex</option>
                 <option value="Random">Random</option>
-                <option value="GraphDP">GraphDP</option>
+                <option value="Random">Parti</option>
+                <option value="graphDP">graphDP</option>
                 <option value="biSearch">biSearch</option>
                 <option value="sweepDP">sweepDP</option>
                 <option value="IncGreedy">IncGreedy</option>
               </select>
             </div>
-            {/* <input
-                className="form-check-input"
-                type="radio"
-                name="inlineRadioOptions"
-                id="simplex"
-                value="simplex"
-                checked={this.props.mode === "simplex"}
-                onChange={this.handleModeChange}
-              />
-              <label className="form-check-label" htmlFor="simplex">
-                Simplex
-              </label> */}
           </div>
-          {/* <div className="form-check form-check-inline">
-              <input
-                className="form-check-input"
-                type="radio"
-                name="inlineRadioOptions"
-                id="random"
-                value="random"
-                checked={this.props.mode === "random"}
-                onChange={this.handleModeChange}
-              />
-              <label className="form-check-label" htmlFor="random">
-                Random
-              </label>
-            </div> */}
-          {/* </div> */}
         </td>
-        <td />
       </tr>
     );
     return (
       <div className="text-center m-auto" style={{ maxWidth: "50rem" }}>
+        <img alt='' onClick={() => window.location.reload()} src={imgURL} style={{ 'width': '50px', 'position': 'absolute', 'top': '15px', 'left': '15px', 'cursor': 'pointer' }} />
         <div type="button"
           className="btn btn-primary"
           style={{ position: 'absolute', top: '15px', right: '15px', width: "8rem" }}
@@ -212,23 +208,14 @@ class Welcome extends React.Component {
         >
           Upload
         </div>
-        <h1>Find Your Favorite!</h1>
-        <p className="lead text-muted">
-          This is a demostration of an interactive system for finding your
-          favorite car in a used car database. <br />
-          Enter your acceptable range for each attribute (leave blank to use the
-          default). <br />
-          You will be presented two cars each time and you need to choose the
-          one you favor more. <br />
-          Click the "Start" button to find your favorite car in the database!{" "}
-          <br />
-        </p>
+        <img alt='' src={imgFavorite} style={{ 'width': '400px' }} />
         <table className="table">
           <thead>
             <tr>
               <th className="align-middle">Attribute</th>
               <th>Lower bound</th>
               <th>Upper bound</th>
+              <th>Smaller better</th>
               <th className="hidden">Discard</th>
             </tr>
           </thead>
@@ -263,6 +250,7 @@ const mapDispatchToProps = dispatch => ({
   },
   toggleMask: (attr, mask) => dispatch(toggleMask(attr, mask)),
   changeMode: mode => dispatch(changeMode(mode)),
+  changeK: K => dispatch(changeK(K)),
   setDataset: (points, labels, attributes) => dispatch(setDataset(points, labels, attributes))
 });
 
