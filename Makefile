@@ -50,7 +50,9 @@ clean:
 web: react-app/public/web.js
 
 react-app/public/web.js: $(filter-out embin/main.cpp.o, $(EM_OBJECTS))
-	$(EMXX) --bind $(EM_LIB) $^ -o $@ $(LIBRARIES)
+	$(EMXX) --bind $(EM_LIB) $^ -o $@ $(LIBRARIES) 
 	# -s ENVIRONMENT=node
 	# -s MODULARIZE=1 -s EXPORT_ES6=1
 	# -s ALLOW_MEMORY_GROWTH=1
+	# -s ALLOW_MEMORY_GROWTH=1 -s TOTAL_MEMORY=512MB
+	# -s ALLOW_MEMORY_GROWTH=1 -s INITIAL_MEMORY=64MB

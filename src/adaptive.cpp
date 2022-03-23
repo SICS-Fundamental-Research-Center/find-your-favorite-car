@@ -605,7 +605,8 @@ point_set_t* IncGreedy(int k, point_set_t* point_set, point_set_t* selected)
 
 		for (int j = 0; j < dim; j++)
 		{
-			b_value[j] = 0;
+			b_value[j] = -1;
+			result->points[j] = point_set->points[0];
 			for (int i = 0; i < point_set->numberOfPoints; i++)
 			{
 				if (point_set->points[i]->coord[j] > b_value[j])
@@ -619,6 +620,7 @@ point_set_t* IncGreedy(int k, point_set_t* point_set, point_set_t* selected)
 		delete[] b_value;
 		count = dim;
 	}
+
 
 	if (count == k + selected->numberOfPoints)
 		return result;

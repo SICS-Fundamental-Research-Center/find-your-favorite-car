@@ -46,8 +46,11 @@ class Welcome extends React.Component {
   }
 
   handleStart = () => {
+    if (Object.values(this.props.mask).filter((i) => i === 1).length < 2) {
+      return alert('You select at least two properties')
+    }
     if (!['Random', 'Simplex', 'Parti'].includes(this.props.mode)) {
-      var K = parseInt(prompt('Please input a integer K >= ' + this.props.attributes.length))
+      var K = parseInt(prompt('Please input an integer K >= ' + this.props.attributes.length))
       if (!(/(^[1-9]\d*$)/.test(K) && K >= this.props.attributes.length)) return alert('Illegal number!')
       this.props.changeK(K)
     }
@@ -74,8 +77,9 @@ class Welcome extends React.Component {
     }
     let maxPoints;
     const str = this.inputs.maxPoints.current.value.trim();
-    if (str === "") maxPoints = this.props.points.length;
+    if (str === "") maxPoints = 1000;
     else if (/\d+/.test(str)) maxPoints = parseInt(str);
+    else if (maxPoints>50000 || maxPoints<100) return alert('100 ≤ maximum range ≤ 50000');
     else {
       alert(`${str} for Maximum items is not an integer`);
       return;
@@ -87,7 +91,7 @@ class Welcome extends React.Component {
       maxPoints
     );
     if (candidates.length === 0) {
-      alert("No matching cars, try larger ranges");
+      alert("No matching Tuples, try larger ranges");
       return;
     }
     this.props.startAlgorithm(candidates);
@@ -167,12 +171,12 @@ class Welcome extends React.Component {
     });
     trs.push(
       <tr key="other">
-        <td className="align-middle font-weight-bold">Max No. of Pointes</td>
+        <td className="align-middle font-weight-bold">Max No. of Tuples</td>
         <td>
           <input
             type="text"
             className="form-control"
-            placeholder={this.props.points.length}
+            placeholder='1000'
             ref={this.inputs.maxPoints}
           />
         </td>
@@ -202,13 +206,26 @@ class Welcome extends React.Component {
       <div className="text-center m-auto" style={{ maxWidth: "50rem" }}>
         <img alt='' onClick={() => window.location.reload()} src={imgURL} style={{ 'width': '50px', 'position': 'absolute', 'top': '15px', 'left': '15px', 'cursor': 'pointer' }} />
         <div type="button"
-          className="btn btn-primary"
+          title="Format of Input file
+                ------------------------------------&#13;
+                The format of the first line is: n d
+                n - the number of tuples in the dataset, integer
+                d - dimensionality, integer
+                The format of the second line is:
+                <A1> <A2> ... <Ad>
+                Ai - the i-th attribute name, string
+                The format of the following n lines is
+                <dim 1> <dim 2> ... <dim d>.
+                Each line corresponds to a tuple."
+          className="btn btn-primary upload"
           style={{ position: 'absolute', top: '15px', right: '15px', width: "8rem" }}
           onClick={this.upload}
         >
           Upload
         </div>
         <img alt='' src={imgFavorite} style={{ 'width': '400px' }} />
+        <br/>
+        <br/>
         <table className="table">
           <thead>
             <tr>

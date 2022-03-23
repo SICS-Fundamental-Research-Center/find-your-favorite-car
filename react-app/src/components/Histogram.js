@@ -9,7 +9,7 @@ import {
   ChartLabel
 } from "react-vis";
 
-// a histogram to show the number of cars left vs the number of questions asked.
+// a histogram to show the number of tuples left vs the number of questions asked.
 class Histogram extends React.Component {
   constructor(props) {
     super(props);
@@ -33,7 +33,7 @@ class Histogram extends React.Component {
   render() {
     return (
       <div>
-        <h4>No. of Cars Left vs. No. of Questions Asked</h4>
+        <h4>No. of Tuples Left vs. No. of Questions Asked</h4>
         <div style={{ width: "25rem", height: "25rem" }}>
           <FlexibleXYPlot onMouseLeave={this._onMouseLeave}>
             <XAxis
@@ -58,7 +58,7 @@ class Histogram extends React.Component {
               }}
             />
             <ChartLabel
-              text="No. of Cars Left"
+              text="No. of Tuples Left"
               includeMargin={false}
               xPercent={-0.01}
               yPercent={0.05}
@@ -77,7 +77,7 @@ class Histogram extends React.Component {
             {this.state.hintValue && (
               <Hint value={this.state.hintValue}>
                 <p style={{ color: "black" }}>
-                  Q{this.state.hintValue.x}: {this.state.hintValue.y} Cars Left
+                  Q{this.state.hintValue.x}: {this.state.hintValue.y} Tuples Left
                 </p>
               </Hint>
             )}

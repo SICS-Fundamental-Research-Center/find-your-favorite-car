@@ -21,24 +21,29 @@ class Stats extends React.Component {
     });
     const prunedTrs = this.props.prunedPoints.map(([idx, step], i) => (
       <tr key={i} data-toggle="tooltip" title={this.props.labels[idx]}>
-        {[step, ...this.props.candidates[idx]].map((x, j) => (
-          <td key={j}>{x}</td>
+        {[<td>{step}</td>].concat(this.props.candidates[idx].map((x, j) => {
+          if (this.props.mask[this.props.attributes[j][0]]) {
+            return <td key={j}>{x}</td>
+          }
+        }
         ))}
       </tr>
     ));
     const leftTrs = this.props.leftPoints.map((idx, i) => (
       <tr key={i} data-toggle="tooltip" title={this.props.labels[idx]}>
-        {this.props.candidates[idx].map((x, j) => (
-          <td key={j}>{x}</td>
-        ))}
+        {this.props.candidates[idx].map((x, j) => {
+          if (this.props.mask[this.props.attributes[j][0]]) {
+            return <td key={j}>{x}</td>
+          }
+        })}
       </tr>
     ));
     return (
       <div>
-        <h2 style={{'background':'gainsboro','borderRadius':'5px','padding':'5px'}}>Statistics</h2>
+        <h2 style={{ 'background': 'gainsboro', 'borderRadius': '5px', 'padding': '5px' }}>Statistics</h2>
         <div className="row">
           <div className="col">
-            <h4>The No. of Cars Pruned: {this.props.prunedPoints.length}</h4>
+            <h4>The No. of Tuples Pruned: {this.props.prunedPoints.length}</h4>
             <table
               className={classNames("table", "table-hover", {
                 "table-fixed": prunedTrs.length > 7
@@ -55,7 +60,7 @@ class Stats extends React.Component {
           </div>
           <div className="col">
             <h4>
-              The No. of Cars Left in the Database:{" "}
+              The No. of Tuples Left in the Database:{" "}
               {this.props.leftPoints.length}
             </h4>
             <table

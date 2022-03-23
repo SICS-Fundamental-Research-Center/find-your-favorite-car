@@ -23,9 +23,11 @@ function Result({
   });
   const trs = leftPoints.map((idx, i) => (
     <tr key={i} data-toggle="tooltip" title={labels[idx]}>
-      {candidates[idx].map((x, j) => (
-        <td key={j}>{x}</td>
-      ))}
+      {candidates[idx].map((x, j) => {
+        if (mask[attributes[j][0]]) {
+          return <td key={j}>{x}</td>
+        }
+      })}
     </tr>
   ));
   return (
@@ -33,8 +35,8 @@ function Result({
       <h4>The Total No. of Questions Asked is: {numLeftPoints.length - 1}.</h4>
       <h4>
         {leftPoints.length === 1
-          ? "Your Favourite Car is:"
-          : `${leftPoints.length} Cars Left in the Database:`}
+          ? "Your Favourite Tuple is:"
+          : `${leftPoints.length} Tuples Left in the Database:`}
       </h4>
       <table
         className={classNames("table", "table-hover", {

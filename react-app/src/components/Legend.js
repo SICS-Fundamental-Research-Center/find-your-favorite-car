@@ -1,5 +1,6 @@
 import React from "react";
 import Slider from "react-slick";
+import { connect } from "react-redux";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAngleUp, faAngleDown } from "@fortawesome/free-solid-svg-icons";
 
@@ -35,12 +36,19 @@ function SlideItem({ text }) {
 
 // show/change the selected attributes for displaying the convex hull
 class Legend extends React.Component {
+  constructor(props) {
+    super(props);
+    this.attributes = [];
+    this.props.attributes.forEach(([attr]) => {
+      if (this.props.mask[attr]) this.attributes.push(attr);
+    });
+  }
   render() {
     const settings = {
       dots: false,
       infinite: true,
       speed: 500,
-      slidesToShow: 3,
+      slidesToShow: this.attributes.length-1,
       slidesToScroll: 1,
       vertical: true,
       verticalSwiping: true,
@@ -81,10 +89,7 @@ class Legend extends React.Component {
             <FontAwesomeIcon icon={faAngleUp} />
           </div>
           <Slider {...settings} ref={self => (this.slider = self)}>
-            <SlideItem text="Price (USD)" />
-            <SlideItem text="Year" />
-            <SlideItem text="Power (HP)" />
-            <SlideItem text="Used KM" />
+            {this.attributes.map((attr) => (<SlideItem text={attr}/>))}
           </Slider>
           <div
             onClick={() => this.slider.slickNext()}
@@ -98,4 +103,9 @@ class Legend extends React.Component {
   }
 }
 
-export default Legend;
+const mapStateToProps = ({ mask, attributes }) => ({
+  mask,
+  attributes
+});
+
+export default connect(mapStateToProps)(Legend);

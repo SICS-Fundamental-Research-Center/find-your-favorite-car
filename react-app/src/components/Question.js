@@ -21,16 +21,18 @@ import {
   VerticalBarSeries,
   ChartLabel
 } from "react-vis";
-var smallerBetter, candidatesVec;
+var smallerBetter, candidatesVec, isSelected;
 
 // iteratively ask the user to choose the preferred car from a pair of cars.
 class Question extends React.Component {
   constructor(props) {
     super(props);
     smallerBetter = new window.Module.VectorInt();
+    isSelected = new window.Module.VectorInt();
     this.attributes = [];
-    console.log(this.props.mask)
     this.props.attributes.forEach(([attr, config]) => {
+      console.log(this.props.mask[attr])
+      isSelected.push_back(this.props.mask[attr])
       if (this.props.mask[attr]) {
         smallerBetter.push_back(config.smallerBetter ? 1 : 0);
         this.attributes.push(attr);
@@ -45,6 +47,7 @@ class Question extends React.Component {
       this.runner = new window.Module.SevenAlgorithmRunner(
         candidatesVec,
         smallerBetter,
+        isSelected,
         { 'DMM': 4, 'cube': 5, 'sphere': 6, 'graphDP': 7, 'biSearch': 8, 'sweepDP': 9, 'IncGreedy': 10 }[this.props.mode],
         this.props.K
       );
@@ -66,6 +69,7 @@ class Question extends React.Component {
     this.runner = new window.Module.AlgorithmRunner(
       candidatesVec,
       smallerBetter,
+      isSelected,
       { 'Random': 1, 'Simplex': 2, 'Parti': 3 }[this.props.mode]
     );
     console.log(this.runner)
@@ -137,9 +141,9 @@ class Question extends React.Component {
   };
 
   inputDimension = () => {
-    var D = prompt('Please input ' + this.attributes.length + ' dimension')
+    var D = prompt('Please input ' + this.attributes.length + ' dimensions. e.g.', this.attributes.map((i) =>  Math.floor(Math.random() * 10)))
     if (!D) return
-    var jsArray = D.trim().split(' ').map((n) => parseInt(n))
+    var jsArray = D.trim().split(',').map((n) => parseInt(n))
     if (jsArray.includes(NaN) || jsArray.length !== this.attributes.length || jsArray.some((i) => i < 0)) return alert('Illegal number set!')
     this.runner.globalBest_localBest(array2Vector(jsArray))
     this.global_local_regret = { globalBest: this.props.candidates[this.runner.get_globalBestId()], localBest: this.props.candidates[this.runner.get_localBestId()], regretRatio: this.runner.get_regret_ratio() }
@@ -183,7 +187,7 @@ class Question extends React.Component {
         <div>
           <h2 style={{ 'background': 'gainsboro', 'borderRadius': '5px', 'padding': '5px' }}>Your Choice</h2>
           <h4>
-            Q{this.props.numLeftPoints.length}: Choose the Car You Favor More
+            Q{this.props.numLeftPoints.length}: Choose the Tuple You Favor More
             among the Following Options
           </h4>
           <div className="row justify-content-center align-items-center">
@@ -220,11 +224,12 @@ class Question extends React.Component {
 
     const trs = selectedPoint.slice(-this.props.K).map((id, i) => {
       const tds = [<td key="Option No.">{id}</td>];
-      
+      console.log(id)
+      if(id===-1) return
       this.props.candidates[id].forEach((x, j) => {
-          if (this.props.mask[this.props.attributes[j][0]]) {
-            tds.push(<td key={j}>{x}</td>);
-          }
+        if (this.props.mask[this.props.attributes[j][0]]) {
+          tds.push(<td key={j}>{x}</td>);
+        }
       });
       return (
         <tr key={i} data-toggle="tooltip" title={this.props.attributes[id]}>
@@ -237,7 +242,7 @@ class Question extends React.Component {
       <div>
         <br />
         <div style={{ 'borderRadius': '5px', 'padding': '5px', 'fontSize': '22px' }}>
-          <span style={{ 'color': '#ff8737' }}>{this.props.mode}</span> algorithm selects k&lt;={this.props.K} interest points for you
+          <span style={{ 'color': '#ff8737' }}>{this.props.mode}</span> selects k&lt;={this.props.K} tuples for you
         </div>
         <br />
         <table style={{ 'borderBottom': '1px solid gainsboro' }} className="table table-hover text-center">
@@ -251,7 +256,7 @@ class Question extends React.Component {
             Output size: {selectedPoint.length}
           </div>
           <div onClick={this.inputDimension} style={{ 'background': '#ff8737', 'color': 'white', 'padding': '5px', 'borderRadius': '5px' }}>
-            Input D Dimension
+            Input D Dimensions
           </div>
         </div>
         <br />
@@ -324,7 +329,7 @@ class Question extends React.Component {
         <br />
         {this.global_local_regret ? (
           <div style={{ 'background': '#ff8737', 'color': 'white', 'textAlign': 'left', 'borderRadius': '5px', 'padding': '8px' }}>
-            
+
             <div>Your global favorite tuple is:<br />
               <table style={{ 'borderBottom': '1px solid gainsboro' }} className="table table-hover text-center">
                 <thead>

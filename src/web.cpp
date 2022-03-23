@@ -15,16 +15,29 @@
 int get_current_best_pt(point_set_t* P, vector<int>& C_idx, vector<point_t*>& ext_vec);
 vector<int> generate_S(point_set_t* P, vector<int>& C_idx, int s, int current_best_idx, int& last_best, vector<int>& frame, vector<point_t*>& ext_vec, int cmp_option);
 
-point_set_t *normalize_points(vector<vector<double>> &points, vector<int> smallerBetter){
+point_set_t* normalize_points(vector<vector<double>>& points, vector<int> smallerBetter, vector<int> isSelected) {
+    int oldDim = points[0].size();
+    vector<vector<double>> selectedPoints;
+ 
+    for (int i = 0; i < points.size(); ++i) {
+        vector<double> newPoint;
+        for (int j = 0; j < oldDim; ++j)
+        {
+            if (isSelected[j])
+                newPoint.push_back(points[i][j]);
+        }
+        selectedPoints.push_back(newPoint);
+    }
 
-    int dim = points[0].size();
-    point_set_t* norm_points = alloc_point_set(points.size());
+    int dim = selectedPoints[0].size();
+
+    point_set_t* norm_points = alloc_point_set(selectedPoints.size());
     vector<double> max_vals(dim, 0), min_vals(dim, INF);
 
-    for(int i = 0; i < points.size(); ++i){
+    for (int i = 0; i < selectedPoints.size(); ++i) {
         point_t* point = alloc_point(dim, i); // dim = dim, id = i
         for(int j = 0; j < dim; ++j){
-            double val = points[i][j];
+            double val = selectedPoints[i][j];
             max_vals[j] = std::max(max_vals[j], val);
             min_vals[j] = std::min(min_vals[j], val);
             point->coord[j] = val;
@@ -32,7 +45,7 @@ point_set_t *normalize_points(vector<vector<double>> &points, vector<int> smalle
         norm_points->points[i] = point;
     }
 
-    for(int i = 0; i < points.size(); ++i){
+    for (int i = 0; i < selectedPoints.size(); ++i) {
         for(int j = 0; j < dim; ++j){
             double norm_val = (norm_points->points[i]->coord[j] - min_vals[j]) / (max_vals[j] - min_vals[j]);
             if(smallerBetter[j]) norm_val = 1 - norm_val;
@@ -45,14 +58,14 @@ point_set_t *normalize_points(vector<vector<double>> &points, vector<int> smalle
 
 class AlgorithmRunner {
 public:
-    AlgorithmRunner(vector<vector<double>> &candidates, vector<int> &smallerBetter, int cmp_option) {
+    AlgorithmRunner(vector<vector<double>> &candidates, vector<int> &smallerBetter, vector<int> &isSelected, int cmp_option) {
         this->cmp_option = cmp_option;
         s = 2;
         prune_option = RTREE;
         current_best_idx = -1;
         last_best = -1;
         rr = 1;
-        points_norm = normalize_points(candidates, smallerBetter); // new points
+        points_norm = normalize_points(candidates, smallerBetter, isSelected); // new points
         skyline = skyline_point(points_norm); // does not copy points
 
         int dim = skyline->points[0]->dim;
@@ -153,7 +166,8 @@ vector<vector<double>> readConvexHullVertices(){
     ifstream ifs("ext_pt");
     vector<vector<double>> vertices;
     if(!ifs.is_open()) return vertices;
-    int dim, size;
+    int dim;
+    int size;
     ifs >> dim >> size;
     for(int i = 0; i < size; ++i){
         double sum = 0;
@@ -171,25 +185,15 @@ vector<vector<double>> readConvexHullVertices(){
 
 class SevenAlgorithmRunner {
 public:
-    SevenAlgorithmRunner(vector<vector<double>> &candidates, vector<int> &smallerBetter, int algorithmIdx, int k=15) {
-        points_norm = normalize_points(candidates, smallerBetter); // new points
+    SevenAlgorithmRunner(vector<vector<double>> &candidates, vector<int> &smallerBetter, vector<int> &isSelected, int algorithmIdx, int k=15) {
+        points_norm = normalize_points(candidates, smallerBetter, isSelected); // new points
         skyline = skyline_point(points_norm); // does not copy points
         this->k = k;
         int dim = skyline->points[0]->dim;
-        for(int i = 0; i < skyline->numberOfPoints; ++i){
-            C_idx.push_back(i);
-        }
-        for(int i = 0; i < dim; ++i){
-            point_t *e = alloc_point(dim);
-            for(int j = 0; j < dim; ++j){
-                e->coord[j] = i == j ? -1 : 0;
-            }
-            ext_vec.push_back(e);
-        }
 
         switch (algorithmIdx) {
             case 4 :
-                current_best_points = DMM(skyline, k);
+                current_best_points = sphereWSImpLP(skyline, k);
             break;
             
             case 5 :
@@ -197,7 +201,7 @@ public:
             break;
             
             case 6 :
-                current_best_points = sphere(skyline, k);
+                current_best_points = sphereWSImpLP(skyline, k);
             break;
             
             case 7 :
@@ -276,8 +280,6 @@ public:
     }
 
     ~SevenAlgorithmRunner() {
-        for(int i = 0; i < ext_vec.size(); ++i)
-            release_point(ext_vec[i]);
         release_point_set(skyline, false);
         release_point_set(current_best_points, false);
         release_point_set(points_norm, true);
@@ -290,8 +292,6 @@ public:
     point_set_t *skyline;
     point_set_t *current_best_points = alloc_point_set(0);
     vector<int> indices;
-    vector<int> C_idx;
-    vector<point_t *> ext_vec;
 };
 
 #ifdef EMSCRIPTEN
@@ -305,14 +305,14 @@ EMSCRIPTEN_BINDINGS(my_module) {
     register_vector<vector<double>>("VecVecDouble");
 
     class_<AlgorithmRunner>("AlgorithmRunner")
-        .constructor<vector<vector<double>> &, vector<int> &, int>()
+        .constructor<vector<vector<double>> &, vector<int> &, vector<int> &, int>()
         .function("nextPair", &AlgorithmRunner::nextPair)
         .function("choose", &AlgorithmRunner::choose)
         .function("numLeftPoints", &AlgorithmRunner::numLeftPoints)
         .function("getCandidatesIndices", &AlgorithmRunner::getCandidatesIndices)
         ;
     class_<SevenAlgorithmRunner>("SevenAlgorithmRunner")
-        .constructor<vector<vector<double>> &, vector<int> &, int, int>()
+        .constructor<vector<vector<double>> &, vector<int> &, vector<int> &, int, int>()
         .function("getIndices", &SevenAlgorithmRunner::getIndices)
         .function("getMrr", &SevenAlgorithmRunner::getMrr)
         .function("Next_IncGreedy", &SevenAlgorithmRunner::Next_IncGreedy)

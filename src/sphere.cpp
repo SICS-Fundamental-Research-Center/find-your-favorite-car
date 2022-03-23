@@ -192,7 +192,8 @@ point_set_t* sphereWSImpLP(point_set_t* point_set, int k)
 
 	for (int j = 0; j < dim; j++)
 	{
-		b_value[j] = 0;
+		b_value[j] = -1;
+		result->points[j] = point_set->points[0];
 		for (int i = 0; i < point_set->numberOfPoints; i++)
 		{
 			if (point_set->points[i]->coord[j] > b_value[j])
@@ -280,6 +281,13 @@ point_set_t* sphereWSImpLP(point_set_t* point_set, int k)
 			active[i] = 0;
 	}
 
+
+	if(max == NULL)
+	{
+		result->numberOfPoints = count;
+		return result;
+
+	}
 
 	result->points[count++] = max;
 	lastRound_max = max;
