@@ -15,6 +15,27 @@
 int get_current_best_pt(point_set_t* P, vector<int>& C_idx, vector<point_t*>& ext_vec);
 vector<int> generate_S(point_set_t* P, vector<int>& C_idx, int s, int current_best_idx, int& last_best, vector<int>& frame, vector<point_t*>& ext_vec, int cmp_option);
 
+
+void deduplicate(point_set_t* &S)
+{
+	if(S->numberOfPoints == 0)
+		return;
+
+	int count = 1;
+	for(int i = 1; i < S->numberOfPoints; i++)
+	{
+		bool found = false;
+		for(int j = 0; j < i; j++)
+		{
+			if(S->points[i]->id == S->points[j]->id)
+				found = true;
+		}
+		if(!found)
+			S->points[count++] = S->points[i];
+	}
+	S->numberOfPoints = count;
+}
+
 point_set_t* normalize_points(vector<vector<double>>& points, vector<int> smallerBetter, vector<int> isSelected) {
     int oldDim = points[0].size();
     vector<vector<double>> selectedPoints;
@@ -225,6 +246,7 @@ public:
             default :
                 current_best_points = DMM(skyline, k);
         }
+		deduplicate(current_best_points);
         mrr = evaluateLP(skyline, current_best_points, 0);
     }
     vector<int> getIndices() {
