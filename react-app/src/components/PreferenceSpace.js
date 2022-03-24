@@ -39,6 +39,7 @@ class PreferenceSpace extends React.Component {
   };
 
   render() {
+    console.log('vertices', this.state.convexHullVertices);
     return (
       <div>
         <h4>Convex Hull of Preference Space</h4>

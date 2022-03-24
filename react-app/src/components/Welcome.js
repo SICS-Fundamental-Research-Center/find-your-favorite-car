@@ -32,6 +32,7 @@ class Welcome extends React.Component {
         var points_attr = text.trim().split("\n").slice(1)
         // for points_attr, the first line is <numOfPoints> <dimension>
         var points = points_attr.slice(1).map(line => line.trim().split(/\s+/).map(str => isNaN(parseFloat(str)) ? 0 : parseFloat(str)));
+        console.log(points);
         var ranges = getRanges(points)
         console.log(ranges)
         var attributes = points_attr[0].trim().split(/\s+/).map((item, index) => {
@@ -40,6 +41,10 @@ class Welcome extends React.Component {
           return [item, rangesItem]
         })
         console.log(attributes)
+        if (points.length < 5000) {
+          alert("please upload data more then 5000 rows!");
+          return;
+        }
         this.props.setDataset(points, '', attributes)
       };
     }
@@ -49,11 +54,7 @@ class Welcome extends React.Component {
     if (Object.values(this.props.mask).filter((i) => i === 1).length < 2) {
       return alert('You select at least two properties')
     }
-    if (!['Random', 'Simplex', 'Parti'].includes(this.props.mode)) {
-      var K = parseInt(prompt('Please input an integer K >= ' + this.props.attributes.length))
-      if (!(/(^[1-9]\d*$)/.test(K) && K >= this.props.attributes.length)) return alert('Illegal number!')
-      this.props.changeK(K)
-    }
+    
 
     const ranges = [];
     const mask = [];
@@ -77,12 +78,21 @@ class Welcome extends React.Component {
     }
     let maxPoints;
     const str = this.inputs.maxPoints.current.value.trim();
-    if (str === "") maxPoints = 1000;
+    console.log('input number', str);
+    if (str === "") maxPoints = 5000;
     else if (/\d+/.test(str)) maxPoints = parseInt(str);
-    else if (maxPoints>50000 || maxPoints<100) return alert('100 ≤ maximum range ≤ 50000');
+    else if (maxPoints>50000 || maxPoints<5000) return alert('100 ≤ maximum range ≤ 50000');
     else {
       alert(`${str} for Maximum items is not an integer`);
       return;
+    }
+
+    if (maxPoints>50000 || maxPoints<5000) return alert('100 ≤ maximum range ≤ 50000');
+
+    if (!['Random', 'Simplex', 'Parti'].includes(this.props.mode)) {
+      var K = parseInt(prompt('Please input an integer K >= ' + this.props.attributes.length))
+      if (!(/(^[1-9]\d*$)/.test(K) && K >= this.props.attributes.length)) return alert('Illegal number!')
+      this.props.changeK(K)
     }
     const candidates = selectCandidates(
       this.props.points,
@@ -176,7 +186,7 @@ class Welcome extends React.Component {
           <input
             type="text"
             className="form-control"
-            placeholder='1000'
+            placeholder='5000'
             ref={this.inputs.maxPoints}
           />
         </td>

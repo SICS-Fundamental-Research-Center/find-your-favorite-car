@@ -83,6 +83,7 @@ class Question extends React.Component {
       const vec = window.Module.readConvexHullVertices();
       const convexHullVertices = vector2Array2D(vec);
       vec.delete();
+      console.log('create convexhullvertices:', convexHullVertices);
       this.props.updateConvexHull(convexHullVertices);
       const indices = this.runner.nextPair();
       this.state = {
@@ -117,6 +118,7 @@ class Question extends React.Component {
     const convexHullVertices = vector2Array2D(
       window.Module.readConvexHullVertices()
     );
+    console.log('vertices to paint', convexHullVertices)
     this.props.updateConvexHull(convexHullVertices);
     const currIndices = this.runner.getCandidatesIndices();
     const prunedIndices = getPrunedIndices(this.prevIndices, currIndices);

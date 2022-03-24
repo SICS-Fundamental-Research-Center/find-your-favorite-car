@@ -28,11 +28,46 @@ class ConvexHull extends React.Component {
   }
 
   drawGeometry = () => {
-    if (this.props.vertices.length < 4) return;
-    const points = this.props.vertices.map(vertex => {
+    let newVers = this.props.vertices.map(x => x);
+    // if (newVers.length < 4) return;
+    if (newVers.length < 4) {
+      if (newVers.length == 3) {
+        const tmp = newVers.at(0);
+        newVers.push(tmp);
+      } else if (newVers.length == 2) {
+        const tmp = newVers.at(0);
+        const tmp1 = newVers.at(1);
+        newVers.push(tmp);
+        newVers.push(tmp1);
+      } else {
+        return;
+      }
+    }
+    // if (this.props.vertices.length < 4) {
+    //   if (this.props.vertices.length == 3) {
+    //     console.log('333-1', this.props.vertices);
+
+    //     let ver = this.props.vertices.at(0);
+    //     this.props.vertices.push(ver);
+    //     console.log('333-2', this.props.vertices);
+    //   }
+    //   if (this.props.vertices.length == 2) {
+    //     console.log('222-1', this.props.vertices);
+
+    //     let ver = this.props.vertices.at(0);
+    //     this.props.vertices.push(ver);
+    //     this.props.vertices.push(ver);
+    //     console.log('222-2', this.props.vertices);
+    //   } else {
+    //       return;
+    //   }
+    // }
+    // if (this.props.vertices.length < 4) return;
+    const points = newVers.map(vertex => {
       const scaled_vertex = vertex.map(x => x * SCALE);
       return new THREE.Vector3(...scaled_vertex);
     });
+    console.log(points, 'points to paint');
     const geometry = new THREE.ConvexGeometry(points);
     const material = new THREE.MeshBasicMaterial({
       color: 0xff0000,

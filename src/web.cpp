@@ -187,13 +187,15 @@ class SevenAlgorithmRunner {
 public:
     SevenAlgorithmRunner(vector<vector<double>> &candidates, vector<int> &smallerBetter, vector<int> &isSelected, int algorithmIdx, int k=15) {
         points_norm = normalize_points(candidates, smallerBetter, isSelected); // new points
+        //5000
         skyline = skyline_point(points_norm); // does not copy points
+        //10
         this->k = k;
         int dim = skyline->points[0]->dim;
 
         switch (algorithmIdx) {
             case 4 :
-                current_best_points = sphereWSImpLP(skyline, k);
+                current_best_points = DMM(skyline, k);
             break;
             
             case 5 :
@@ -283,6 +285,18 @@ public:
         release_point_set(skyline, false);
         release_point_set(current_best_points, false);
         release_point_set(points_norm, true);
+    }
+
+    int getMinPoints(vector<vector<double>> &candidates, vector<int> &smallerBetter, vector<int> &isSelected) {
+        points_norm = normalize_points(candidates, smallerBetter, isSelected); // new points
+        skyline = skyline_point(points_norm); // does not copy points
+        release_point_set(skyline, false);
+        release_point_set(points_norm, true);
+        return points_norm->numberOfPoints;
+    }
+
+    int getMinSKyline() {
+        return skyline->numberOfPoints;
     }
 
 public:

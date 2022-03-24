@@ -39,6 +39,7 @@ class Legend extends React.Component {
   constructor(props) {
     super(props);
     this.attributes = [];
+    //console.log('legend', this.props.mask, this.props.attributes);
     this.props.attributes.forEach(([attr]) => {
       if (this.props.mask[attr]) this.attributes.push(attr);
     });
@@ -89,7 +90,7 @@ class Legend extends React.Component {
             <FontAwesomeIcon icon={faAngleUp} />
           </div>
           <Slider {...settings} ref={self => (this.slider = self)}>
-            {this.attributes.map((attr) => (<SlideItem text={attr}/>))}
+            {this.attributes.map((attr, key) => (<SlideItem key={key} text={attr}/>))}
           </Slider>
           <div
             onClick={() => this.slider.slickNext()}
