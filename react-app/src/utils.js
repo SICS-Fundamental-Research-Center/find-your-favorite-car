@@ -112,7 +112,7 @@ export const array2Vector = array => {
 // both prevIndices and currIndices need to be sorted.
 export const getPrunedIndices = (prevIndices, currIndices) => {
   let prunedIndices = [];
-  for (let i = 0, j = 0; i < prevIndices.size() || j < currIndices.size(); ) {
+  for (let i = 0, j = 0; i < prevIndices.size() || j < currIndices.size();) {
     if (j >= currIndices.size() || prevIndices.get(i) < currIndices.get(j)) {
       prunedIndices.push(prevIndices.get(i));
       ++i;
@@ -123,3 +123,40 @@ export const getPrunedIndices = (prevIndices, currIndices) => {
   }
   return prunedIndices;
 };
+
+const dominates = (p1, p2) => {
+  let i;
+  p1.map((ver, key) => {
+    if (ver < p2.at(key)) return 0;
+  })
+  return 1;
+}
+
+export const getSkyline = (points) => {
+  let i, j, dominated, index = 0, m;
+
+  let sl = new Array(points.length);
+
+  for (i =0; i < points.length; i++) {
+    
+    dominated = 0;
+    const pt = points.at(i).slice();
+
+    for (j = 0; j < index && ! dominated; ++j) {
+      if (dominates(points[sl[j]], pt))
+        dominated = 1;
+    }
+
+    if (!dominated) {
+      m = index;
+      index = 0;
+      for (j =0; j < m; j++) {
+        if (!dominates(pt, points[sl[j]])) {
+          sl[index++] = sl[j];
+        }
+      }
+      sl[index++] = i;
+    }
+  }
+  return index;
+}

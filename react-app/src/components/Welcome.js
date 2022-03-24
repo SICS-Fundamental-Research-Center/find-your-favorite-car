@@ -8,7 +8,7 @@ import {
   setDataset
 } from "../actions";
 import { connect } from "react-redux";
-import { selectCandidates, getRanges } from "../utils";
+import { selectCandidates, getRanges, getSkyline } from "../utils";
 import imgURL from '../assets/imgs/logo-black.png';
 import imgFavorite from '../assets/imgs/favorite.png';
 
@@ -51,8 +51,9 @@ class Welcome extends React.Component {
   }
 
   handleStart = () => {
+    let attNum = Object.values(this.props.mask).filter((i) => i === 1).length;
     if (Object.values(this.props.mask).filter((i) => i === 1).length < 2) {
-      return alert('You select at least two properties')
+      return alert('You should select at least two properties')
     }
     
 
@@ -81,19 +82,26 @@ class Welcome extends React.Component {
     console.log('input number', str);
     if (str === "") maxPoints = 5000;
     else if (/\d+/.test(str)) maxPoints = parseInt(str);
-    else if (maxPoints>50000 || maxPoints<5000) return alert('100 ≤ maximum range ≤ 50000');
+    else if (maxPoints>50000 || maxPoints<5000) return alert('Too few valid tuples! Try more attributes, looser ranges, larger Max No. of Tuples or larger datasets!');
     else {
       alert(`${str} for Maximum items is not an integer`);
       return;
     }
 
-    if (maxPoints>50000 || maxPoints<5000) return alert('100 ≤ maximum range ≤ 50000');
+    if (maxPoints>50000 || maxPoints<5000) return alert('The input is out of the range, please input a number between 5000 ~ 50000');
 
     if (!['Random', 'Simplex', 'Parti'].includes(this.props.mode)) {
-      var K = parseInt(prompt('Please input an integer K >= ' + this.props.attributes.length))
+      var K = parseInt(prompt('Please input an integer more than ' + this.props.attributes.length))
       if (!(/(^[1-9]\d*$)/.test(K) && K >= this.props.attributes.length)) return alert('Illegal number!')
       this.props.changeK(K)
+    } else {
+      if (attNum < 3) {
+        return alert('You should select at least two properties')
+      } else if (attNum > 5) {
+        return alert('You should not select more than five properties')
+      }
     }
+
     const candidates = selectCandidates(
       this.props.points,
       ranges,
@@ -104,6 +112,9 @@ class Welcome extends React.Component {
       alert("No matching Tuples, try larger ranges");
       return;
     }
+    console.log('input points', candidates);
+    let skyline = getSkyline(candidates)
+    console.log('input points', skyline);
     this.props.startAlgorithm(candidates);
   };
 

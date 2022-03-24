@@ -34,11 +34,6 @@ class ConvexHull extends React.Component {
       if (newVers.length == 3) {
         const tmp = newVers.at(0);
         newVers.push(tmp);
-      } else if (newVers.length == 2) {
-        const tmp = newVers.at(0);
-        const tmp1 = newVers.at(1);
-        newVers.push(tmp);
-        newVers.push(tmp1);
       } else {
         return;
       }
@@ -70,12 +65,12 @@ class ConvexHull extends React.Component {
     console.log(points, 'points to paint');
     const geometry = new THREE.ConvexGeometry(points);
     const material = new THREE.MeshBasicMaterial({
-      color: 0xff0000,
+      color: 0x87CEEB,
       //shading: THREE.FlatShading,
       polygonOffset: true,
       polygonOffsetFactor: 1, // positive value pushes polygon further away
       polygonOffsetUnits: 1,
-      opacity: 0.5,
+      opacity: 0.75,
       transparent: true
     });
     this.mesh = new THREE.Mesh(geometry, material);

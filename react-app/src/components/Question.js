@@ -142,8 +142,9 @@ class Question extends React.Component {
     this.props.showResult();
   };
 
+
   inputDimension = () => {
-    var D = prompt('Please input ' + this.attributes.length + ' dimensions. e.g.', this.attributes.map((i) =>  Math.floor(Math.random() * 10)))
+    var D = prompt('Please input ' + this.attributes.length + ' dimensions. e.g: one integer value for each attribute. A larger value indicates that the corresponding attribute is more important. e.g.', this.attributes.map((i) =>  Math.floor(Math.random() * 10)))
     if (!D) return
     var jsArray = D.trim().split(',').map((n) => parseInt(n))
     if (jsArray.includes(NaN) || jsArray.length !== this.attributes.length || jsArray.some((i) => i < 0)) return alert('Illegal number set!')
@@ -244,7 +245,7 @@ class Question extends React.Component {
       <div>
         <br />
         <div style={{ 'borderRadius': '5px', 'padding': '5px', 'fontSize': '22px' }}>
-          <span style={{ 'color': '#ff8737' }}>{this.props.mode}</span> selects k&lt;={this.props.K} tuples for you
+          <span style={{ 'color': '#ff8737' }}>{this.props.mode}</span> selects at most k tuples for you
         </div>
         <br />
         <table style={{ 'borderBottom': '1px solid gainsboro' }} className="table table-hover text-center">
