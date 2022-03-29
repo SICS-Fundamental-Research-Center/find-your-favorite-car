@@ -9,8 +9,10 @@ import {
   SET_MODE,
   SET_K,
   RESTART,
-  UPDATE_CONVEX_HULL
+  UPDATE_CONVEX_HULL,
+  SET_LEFT_PREFER
 } from "../actions";
+import { getMaxDist } from "../utils";
 
 const activeComponent = (state = "Welcome", action) => {
   switch (action.type) {
@@ -119,6 +121,19 @@ const numLeftPoints = (state = [], action) => {
   }
 };
 
+const numLeftPrefer = (state = [], action) => {
+  switch (action.type) {
+    case RESTART:
+      return [];
+    case SET_LEFT_PREFER:
+      // const vertices = action.vertices.map(ver => ver);
+      // const maxDist = getMaxDist(vertices);
+      return [...state, action.num];
+    default:
+      return state;
+  }
+}
+
 // the algorithm to select a pair of points.
 const mode = (state = "DMM", action) => {
   switch (action.type) {
@@ -143,6 +158,7 @@ const K = (state = 15, action) => {
 const vertices = (state = [], action) => {
   switch (action.type) {
     case UPDATE_CONVEX_HULL:
+      console.log('update convex vertices', action);
       return action.vertices;
     default:
       return state;
@@ -159,6 +175,7 @@ export default combineReducers({
   prunedPoints,
   leftPoints,
   numLeftPoints,
+  numLeftPrefer,
   mode,
   K,
   vertices

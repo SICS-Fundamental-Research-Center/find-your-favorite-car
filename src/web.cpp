@@ -183,6 +183,16 @@ private:
     vector<int> S;
 };
 
+double dist(vector<double> p, vector<double> q) {
+    double result = 0;
+    for (int i =0; i < p.size(); i++) {
+        result += abs(p[i] - q[i]);
+    }
+    return result;
+}
+
+double maxDist = 0;
+
 vector<vector<double>> readConvexHullVertices(){
     ifstream ifs("ext_pt");
     vector<vector<double>> vertices;
@@ -201,7 +211,23 @@ vector<vector<double>> readConvexHullVertices(){
         }
         if(sum > 0.9) vertices.push_back(point);
     }
+
+    for (int i = 0; i < vertices.size(); i++) {
+        for (int j= 0; j < vertices.size(); j++) {
+            vector<double> p =vertices[i];
+            vector<double> q = vertices[j];
+            if (dist(p, q) > maxDist) {
+                maxDist = dist(p, q);
+            }
+        }
+    }
     return vertices;
+}
+
+double readMaxDist() {
+    double res = maxDist;
+    maxDist = 0;
+    return res;
 }
 
 class SevenAlgorithmRunner {
@@ -358,6 +384,7 @@ EMSCRIPTEN_BINDINGS(my_module) {
         .function("globalBest_localBest", &SevenAlgorithmRunner::globalBest_localBest);
 
     emscripten::function("readConvexHullVertices", &readConvexHullVertices);
+    emscripten::function("readMaxDist", &readMaxDist);
 }
 
 #else

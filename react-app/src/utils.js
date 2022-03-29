@@ -124,34 +124,48 @@ export const getPrunedIndices = (prevIndices, currIndices) => {
   return prunedIndices;
 };
 
-const dominates = (p1, p2) => {
+const dominates = (p1, p2, smallerBetter, isSelected) => {
   let i;
-  p1.map((ver, key) => {
-    if (ver < p2.at(key)) return 0;
-  })
+  for (i = 0; i < p1.length; i++) {
+    // console.log('121313', isSelected[i], p1.length);
+    // if (isSelected) {
+    //   console.log('121313', isSelected, smallerBetter);
+    // }
+    // if (isSelected == undefined) {
+    //   console.log('dwadadw');
+    // }
+    if (isSelected.at(i) == 1) {
+      // if ( isSelected.at(i) == 1) {
+      // console.log('121313', isSelected[i], smallerBetter[i]);
+      if (smallerBetter[i] == 1) {
+        if (p1[i] > p2[i]) return 0;
+      } else {
+        if (p1[i] < p2[i]) return 0;
+      }
+    }
+  }
   return 1;
 }
 
-export const getSkyline = (points) => {
+export const getSkyline = (points, smallerBetter, isSelected) => {
   let i, j, dominated, index = 0, m;
-
+  console.log(smallerBetter, isSelected);
   let sl = new Array(points.length);
+  for (i = 0; i < points.length; i++) {
 
-  for (i =0; i < points.length; i++) {
-    
     dominated = 0;
     const pt = points.at(i).slice();
 
-    for (j = 0; j < index && ! dominated; ++j) {
-      if (dominates(points[sl[j]], pt))
+    for (j = 0; j < index && !dominated; ++j) {
+      if (dominates(points[sl[j]], pt, smallerBetter, isSelected))
         dominated = 1;
     }
 
     if (!dominated) {
       m = index;
       index = 0;
-      for (j =0; j < m; j++) {
-        if (!dominates(pt, points[sl[j]])) {
+      for (j = 0; j < m; j++) {
+        if (!dominates(pt, points[sl[j]], smallerBetter, isSelected)) {
           sl[index++] = sl[j];
         }
       }
@@ -159,4 +173,28 @@ export const getSkyline = (points) => {
     }
   }
   return index;
+}
+
+export const dist = (p, q) => {
+  let res = 0;
+  for (let i = 0; i < p.length; i++) {
+    res += Math.abs(p[i] = q[i]);
+  }
+  return res;
+}
+
+export const getMaxDist = (vertices) => {
+  console.log('getMaxDist', vertices);
+  let maxDist = 0;
+  for (let i = 0; i < vertices.length; i++) {
+    for (let j = 0; j < vertices.length; j++) {
+      let p = vertices.at(i);
+      let q = vertices.at(j);
+      if (dist(p, q) > maxDist) {
+        maxDist = dist(p, q);
+      }
+    }
+  }
+  console.log('getMaxDist res', maxDist);
+  return maxDist;
 }

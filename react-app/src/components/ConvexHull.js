@@ -9,7 +9,7 @@ class ConvexHull extends React.Component {
   componentDidMount() {
     const width = this.mount.clientWidth;
     const height = this.mount.clientHeight;
-
+    console.log('three vertices', this.props.vertices);
     this.scene = new THREE.Scene();
 
     this.camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
@@ -62,7 +62,7 @@ class ConvexHull extends React.Component {
       const scaled_vertex = vertex.map(x => x * SCALE);
       return new THREE.Vector3(...scaled_vertex);
     });
-    console.log(points, 'points to paint');
+    //console.log(points, 'points to paint');
     const geometry = new THREE.ConvexGeometry(points);
     const material = new THREE.MeshBasicMaterial({
       color: 0x87CEEB,
@@ -149,6 +149,7 @@ class ConvexHull extends React.Component {
 
   componentDidUpdate(prevProps) {
     if (this.props.vertices !== prevProps.vertices) {
+      // console.log('11test')
       if (this.mesh) {
         this.scene.remove(this.mesh);
         this.mesh.geometry.dispose();
@@ -181,7 +182,7 @@ class ConvexHull extends React.Component {
 
   render() {
     return (
-      <div
+      <div className="col"
         style={{ width: "25rem", height: "25rem" }}
         ref={mount => {
           this.mount = mount;

@@ -53,9 +53,9 @@ class Welcome extends React.Component {
   handleStart = () => {
     let attNum = Object.values(this.props.mask).filter((i) => i === 1).length;
     if (Object.values(this.props.mask).filter((i) => i === 1).length < 2) {
-      return alert('You should select at least two properties')
+      return alert('You should select at least two attributes')
     }
-    
+
 
     const ranges = [];
     const mask = [];
@@ -82,13 +82,13 @@ class Welcome extends React.Component {
     console.log('input number', str);
     if (str === "") maxPoints = 5000;
     else if (/\d+/.test(str)) maxPoints = parseInt(str);
-    else if (maxPoints>50000 || maxPoints<5000) return alert('Too few valid tuples! Try more attributes, looser ranges, larger Max No. of Tuples or larger datasets!');
+    else if (maxPoints > 50000 || maxPoints < 5000) return alert('Too few valid tuples! Try more attributes, looser ranges, larger Max No. of Tuples or larger datasets!');
     else {
       alert(`${str} for Maximum items is not an integer`);
       return;
     }
 
-    if (maxPoints>50000 || maxPoints<5000) return alert('The input is out of the range, please input a number between 5000 ~ 50000');
+    if (maxPoints > 50000 || maxPoints < 5000) return alert('The input is out of the range, please input a number between 5000 ~ 50000');
 
     if (!['Random', 'Simplex', 'Parti'].includes(this.props.mode)) {
       var K = parseInt(prompt('Please input an integer more than ' + this.props.attributes.length))
@@ -96,9 +96,9 @@ class Welcome extends React.Component {
       this.props.changeK(K)
     } else {
       if (attNum < 3) {
-        return alert('You should select at least two properties')
+        return alert('You should select at least three attributes')
       } else if (attNum > 5) {
-        return alert('You should not select more than five properties')
+        return alert('You should not select more than five attributes')
       }
     }
 
@@ -112,9 +112,27 @@ class Welcome extends React.Component {
       alert("No matching Tuples, try larger ranges");
       return;
     }
-    console.log('input points', candidates);
-    let skyline = getSkyline(candidates)
-    console.log('input points', skyline);
+    console.log('attr', this.props.attributes);
+    let isSelected = this.props.attributes.map(([attr, config]) => {
+      return this.props.mask[attr];
+    })
+    let smallerBetter = this.props.attributes.map(([attr, config]) => {
+      return config.smallerBetter ? 1 : 0;
+    })
+    //console.log('input points--', candidates, isSelected, smallerBetter);
+
+    //Fconsole.log('input points--', candidates, isSelected, smallerBetter);
+    let skyline = getSkyline(candidates, smallerBetter, isSelected)
+    if (skyline < 10) {
+      console.log('skyline', skyline);
+      return alert('Too few valid tuples! Try more attributes, looser ranges, larger Max No. of Tuples or larger datasets!')
+    }
+    if (['graphDP', 'biSearch', 'sweepDP'].includes(this.props.mode)) {
+      if (Object.values(this.props.mask).filter((i) => i === 1).length != 2) {
+        return alert('You should select only two attributes to perform "graphDP" or "biSearch" or "sweepDP"');
+      }
+    }
+    // console.log('skyline', skyline);
     this.props.startAlgorithm(candidates);
   };
 
@@ -147,7 +165,10 @@ class Welcome extends React.Component {
           <td
             className="align-middle">
             <span
-              onClick={() => this.props.toggleMask(attr, 1 - this.props.mask[attr])}
+              onClick={() => {
+                console.log('mode', this.props.mode );
+                this.props.toggleMask(attr, 1 - this.props.mask[attr])
+              }}
               className={`${this.props.mask[attr] ? "attribute-select" : null}`}
               style={{ 'cursor': 'pointer', 'textDecoration': this.props.mask[attr] ? '' : 'line-through' }}
             >{attr}</span>
@@ -245,8 +266,8 @@ class Welcome extends React.Component {
           Upload
         </div>
         <img alt='' src={imgFavorite} style={{ 'width': '400px' }} />
-        <br/>
-        <br/>
+        <br />
+        <br />
         <table className="table">
           <thead>
             <tr>

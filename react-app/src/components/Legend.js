@@ -49,7 +49,7 @@ class Legend extends React.Component {
       dots: false,
       infinite: true,
       speed: 500,
-      slidesToShow: this.attributes.length-1,
+      slidesToShow: 3,
       slidesToScroll: 1,
       vertical: true,
       verticalSwiping: true,

@@ -7,9 +7,12 @@ import imgURL from '../assets/imgs/logo-black.png';
 function Interaction({ mode }) {
   if (['Random', 'Simplex', 'Parti'].includes(mode)) {
     return (
-      <div>
+      <div style={{ display: "flex", flexDirection: 'row', justifyContent: "space-evenly"}}>
+        <div>
         <Question />
         <Visuals />
+        </div>
+        <div style={{ margin: '20px'}}></div>
         <Stats />
       </div>
     );

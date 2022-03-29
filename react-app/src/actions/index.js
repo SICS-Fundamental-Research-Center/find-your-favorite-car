@@ -4,6 +4,7 @@ export const SET_DATASET = "SET_DATASET";
 export const TOGGLE_MASK = "TOGGLE_MASK";
 export const PRUNE_POINTS = "PRUNE_POINTS";
 export const SET_LEFT_POINTS = "SET_LEFT_POINTS";
+export const SET_LEFT_PREFER = "SET_LEFT_PREFER";
 export const SET_MODE = "SET_MODE";
 export const SET_K = "SET_K";
 export const RESTART = "RESTART";
@@ -40,6 +41,11 @@ export const prunePoints = (indices, step) => ({
 export const setLeftPoints = indices => ({
   type: SET_LEFT_POINTS,
   indices
+});
+
+export const setLeftPrefer = num => ({
+  type: SET_LEFT_PREFER,
+  num
 });
 
 export const changeMode = mode => ({

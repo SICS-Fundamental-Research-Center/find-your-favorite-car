@@ -31,8 +31,9 @@ class Histogram extends React.Component {
   };
 
   render() {
+    // console.log("data??", this.props.data, this.props.leftPoints);
     return (
-      <div>
+      <div className="row justify-content-center" style={{ width: "25rem"}}>
         <h4>No. of Tuples Left vs. No. of Questions Asked</h4>
         <div style={{ width: "25rem", height: "25rem" }}>
           <FlexibleXYPlot onMouseLeave={this._onMouseLeave}>
@@ -88,8 +89,9 @@ class Histogram extends React.Component {
   }
 }
 
-const mapStateToProps = ({ numLeftPoints }) => ({
-  data: numLeftPoints.map((num, i) => ({ x: i, y: num }))
+const mapStateToProps = ({ numLeftPoints, leftPoints }) => ({
+  data: numLeftPoints.map((num, i) => ({ x: i, y: num })),
+  leftPoints
 });
 
 export default connect(mapStateToProps)(Histogram);

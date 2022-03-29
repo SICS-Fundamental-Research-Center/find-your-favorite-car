@@ -4,14 +4,16 @@ import {
   setActiveComponent,
   setLeftPoints,
   prunePoints,
-  updateConvexHull
+  updateConvexHull,
+  setLeftPrefer
 } from "../actions";
 import {
   array2Vector2D,
   array2Vector,
   vector2Array,
   getPrunedIndices,
-  vector2Array2D
+  vector2Array2D,
+  getMaxDist
 } from "../utils";
 import {
   FlexibleXYPlot,
@@ -40,7 +42,7 @@ class Question extends React.Component {
     });
     console.log(this.props.candidates)
     candidatesVec = array2Vector2D(this.props.candidates);
-
+    // console.log('mode', this.props.mode)
     // new algorithm
     if (!['Random', 'Simplex', 'Parti'].includes(this.props.mode)) {
       var d1 = new Date();
@@ -81,10 +83,12 @@ class Question extends React.Component {
       this.stopInteraction();
     } else {
       const vec = window.Module.readConvexHullVertices();
+      const maxDist = window.Module.readMaxDist();
       const convexHullVertices = vector2Array2D(vec);
       vec.delete();
-      console.log('create convexhullvertices:', convexHullVertices);
+      console.log('create convexhullvertices:', convexHullVertices, maxDist);
       this.props.updateConvexHull(convexHullVertices);
+      this.props.setLeftPrefer(maxDist);
       const indices = this.runner.nextPair();
       this.state = {
         pair: vector2Array(indices)
@@ -118,8 +122,15 @@ class Question extends React.Component {
     const convexHullVertices = vector2Array2D(
       window.Module.readConvexHullVertices()
     );
-    console.log('vertices to paint', convexHullVertices)
-    this.props.updateConvexHull(convexHullVertices);
+    const maxDist = window.Module.readMaxDist();
+    console.log('read convexhullvertices:', convexHullVertices, maxDist);
+    // console.log('dist vertexs 1', convexHullVertices);
+
+    // console.log('maxDist', maxDist);
+    // this.props.setLeftPrefer(maxDist);
+    // console.log('vertices to paint', convexHullVertices)
+    this.props.updateConvexHull(convexHullVertices)
+    this.props.setLeftPrefer(maxDist);
     const currIndices = this.runner.getCandidatesIndices();
     const prunedIndices = getPrunedIndices(this.prevIndices, currIndices);
     const questioNo = this.props.numLeftPoints.length;
@@ -144,7 +155,7 @@ class Question extends React.Component {
 
 
   inputDimension = () => {
-    var D = prompt('Please input ' + this.attributes.length + ' dimensions. e.g: one integer value for each attribute. A larger value indicates that the corresponding attribute is more important. e.g.', this.attributes.map((i) =>  Math.floor(Math.random() * 10)))
+    var D = prompt('Please input ' + this.attributes.length + ' dimensions. e.g: one integer value for each attribute. A larger value indicates that the corresponding attribute is more important. e.g.', this.attributes.map((i) => Math.floor(Math.random() * 10)))
     if (!D) return
     var jsArray = D.trim().split(',').map((n) => parseInt(n))
     if (jsArray.includes(NaN) || jsArray.length !== this.attributes.length || jsArray.some((i) => i < 0)) return alert('Illegal number set!')
@@ -173,7 +184,9 @@ class Question extends React.Component {
             <button
               type="button"
               className="btn btn-outline-success btn-sm"
-              onClick={() => this.choose(i)}
+              onClick={() => {
+                this.choose(i)
+              }}
             >
               Choose
             </button>
@@ -228,7 +241,7 @@ class Question extends React.Component {
     const trs = selectedPoint.slice(-this.props.K).map((id, i) => {
       const tds = [<td key="Option No.">{id}</td>];
       console.log(id)
-      if(id===-1) return
+      if (id === -1) return
       this.props.candidates[id].forEach((x, j) => {
         if (this.props.mask[this.props.attributes[j][0]]) {
           tds.push(<td key={j}>{x}</td>);
@@ -389,7 +402,8 @@ const mapStateToProps = ({
   attributes,
   numLeftPoints,
   mode,
-  K
+  K,
+  vertices
 }) => ({
   labels,
   candidates,
@@ -397,7 +411,8 @@ const mapStateToProps = ({
   attributes,
   numLeftPoints,
   mode,
-  K
+  K,
+  vertices
 });
 
 const mapDispatchToProps = dispatch => ({
@@ -412,7 +427,10 @@ const mapDispatchToProps = dispatch => ({
   },
   updateConvexHull: vertices => {
     dispatch(updateConvexHull(vertices));
-  }
+  },
+  setLeftPrefer: maxDist => {
+    dispatch(setLeftPrefer(maxDist));
+  },
 });
 
 export default connect(
