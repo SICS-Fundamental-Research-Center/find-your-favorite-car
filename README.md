@@ -1,4 +1,4 @@
-This project contains all source code for the web version of the interactive system _FindYourFavorite_.
+This project contains all source code for the web version of the demo system _Favorite+_.
 
 Follow the intructions below to run the system.
 
